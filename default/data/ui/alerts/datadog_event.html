@@ -1,0 +1,46 @@
+<form class="form-horizontal form-complex">
+<div class="control-group">
+	<label class="control-label" for="datadog_event_title">Title<span class="required">*</span> </label>
+    <div class="controls">
+	<input type="text" name="action.datadog_event.param.title" id="datadog_event_title"/>
+    </div>
+</div>
+<div class="control-group">
+	<label class="control-label" for="datadog_event_message">Message</label>
+    <div class="controls">
+	<textarea type="text" name="action.datadog_event.param.message" id="datadog_event_message"  style="height: 120px;"/>
+    </div>
+</div>
+<div class="control-group">
+	<label class="control-label" for="datadog_event_tags">Tags</label>
+    <div class="controls">
+	<input type="text" name="action.datadog_event.param.tags" id="datadog_event_tags"/>
+    </div>
+</div>
+<div class="control-group">
+	<label class="control-label" for="datadog_event_alert_type">Alert Type<span class="required">*</span> </label>
+    <div class="controls">
+<select name="action.datadog_event.param.alert_type" id="datadog_event_alert_type">
+        <option value="success">Success</option>
+        <option value="error">Error</option>
+        <option value="info">Info</option>
+        <option value="warning">Warning</option>
+</select>
+    </div>
+</div>
+<div class="control-group">
+	<label class="control-label" for="datadog_event_priority">Priority<span class="required">*</span> </label>
+    <div class="controls">
+<select name="action.datadog_event.param.priority" id="datadog_event_priority">
+        <option value="low">Low</option>
+        <option value="normal">Normal</option>
+</select>
+    </div>
+</div>
+<div class="control-group">
+	<label class="control-label" for="datadog_event_aggregation_key">Aggregation Key</label>
+    <div class="controls">
+	<input type="text" name="action.datadog_event.param.aggregation_key" id="datadog_event_aggregation_key"/>
+    </div>
+</div>
+</form>
