@@ -1,0 +1,119 @@
+<form theme="dark" refresh="120">
+  <label>DataDog Custom Alert Action Info</label>
+  <description>Info on what the DataDog Custom Alert Action is doing (requires "Log responses from DataDog" to be enabled).</description>
+  <search id="base_search">
+    <query>
+      `datadog_event_indexes` sourcetype="datadog:response" | table _time splunk_app splunk_search_name splunk_owner dd_title dd_alert_type dd_priority dd_id dd_tags
+    </query>
+    <earliest>$tok_time.earliest$</earliest>
+    <latest>$tok_time.latest$</latest>
+  </search>
+  <fieldset submitButton="false" autoRun="true">
+    <input type="time" token="tok_time" searchWhenChanged="true">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Total Events sent</title>
+      <single>
+        <search base="base_search">
+          <query>
+            | stats count
+          </query>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <title>DataDog Events over time</title>
+      <description>Shows number and rate of events sent over time</description>
+      <chart>
+        <search base="base_search">
+          <query>
+            | timechart count
+          </query>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>DataDog Event Stats</title>
+      <input type="dropdown" token="tok_type" searchWhenChanged="true">
+        <label>Aggregation</label>
+        <choice value="dd_alert_type">Alert Type</choice>
+        <choice value="splunk_app">App</choice>
+        <choice value="splunk_owner">Owner</choice>
+        <choice value="dd_priority">Priority</choice>
+        <choice value="splunk_search_name">Search</choice>
+        <choice value="dd_tags">Tags</choice>
+        <choice value="dd_title">Title</choice>
+        <default>dd_alert_type</default>
+      </input>
+      <chart>
+        <search base="base_search">
+          <query>
+            | stats count by $tok_type$
+          </query>
+        </search>
+        <option name="charting.chart">column</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Last 5 Events sent to DataDog</title>
+      <table>
+        <title>Click on a row to open the event in DataDog</title>
+        <search base="base_search">
+          <query>
+            | sort limit=5 - _time | fields - tags
+          </query>
+        </search>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">row</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <drilldown>
+          <link target="_blank">https://app.datadoghq.com/event/event?id=$row.id$</link>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>DataDog Event internal logs</title>
+      <event>
+        <search>
+          <query>(index="_internal" sourcetype="tadatadog:log") OR (index="cim_modactions" sourcetype="modular_alerts:datadog_event") source="*datadog_event_modalert.log"</query>
+          <earliest>$tok_time.earliest$</earliest>
+          <latest>$tok_time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="list.drilldown">none</option>
+        <option name="list.wrap">1</option>
+        <option name="maxLines">5</option>
+        <option name="raw.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">0</option>
+        <option name="table.drilldown">none</option>
+        <option name="table.wrap">1</option>
+        <option name="type">list</option>
+      </event>
+    </panel>
+  </row>
+</form>

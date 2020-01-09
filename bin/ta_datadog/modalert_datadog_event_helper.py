@@ -1,6 +1,4 @@
 
-import json
-
 # encoding = utf-8
 
 def process_event(helper, *args, **kwargs):
@@ -37,12 +35,12 @@ def process_event(helper, *args, **kwargs):
     helper.set_log_level(helper.log_level)
 
     # The following example gets the setup parameters and prints them to the log
-    dd_uri = helper.get_global_setting("dd_uri")
-    helper.log_info("dd_uri={}".format(dd_uri))
     api_key = helper.get_global_setting("api_key")
     helper.log_info("api_key={}".format(api_key))
-    app_key = helper.get_global_setting("app_key")
-    helper.log_info("app_key={}".format(app_key))
+    log_datadog = helper.get_global_setting("log_datadog")
+    helper.log_info("log_datadog={}".format(log_datadog))
+    log_index = helper.get_global_setting("log_index")
+    helper.log_info("log_index={}".format(log_index))
 
     # The following example gets the alert action parameters and prints them to the log
     title = helper.get_param("title")
@@ -84,14 +82,18 @@ def process_event(helper, *args, **kwargs):
     """
 
     helper.log_info("Alert action datadog_event started.")
+    
+    helper.log_debug("helper.settings='{}'".format(helper.settings))
 
     # TODO: Implement your alert action logic here
-    dd_uri = helper.get_global_setting("dd_uri")
-    app_key = helper.get_global_setting("app_key")
-    api_key = helper.get_global_setting("api_key")
-
-    send_url = dd_uri + "/events" #?api_key=" + api_key + "&" + app_key
-    helper.log_debug("send_url: {}".format(send_url))
+    try:
+        import json
+        import splunklib.client as client
+    except Exception as err_message:
+        helper.log_error("{}".format(err_message))
+        return 1
+    
+    send_url = 'https://app.datadoghq.com/api/v1/events'
 
     message = dict()
     message['source_type_name'] = "splunk"
@@ -103,23 +105,39 @@ def process_event(helper, *args, **kwargs):
     message['aggregation_key'] = helper.get_param('aggregation_key')
 
     payload = json.dumps(message)
-    helper.log_info("payload: {}".format(payload))
+    helper.log_debug("payload='{}'".format(payload))
 
     try:
-        #r = requests.post(send_url, data=payload)
         headers = dict()
-        headers['Content-type'] = "application/json"
+        headers['Content-type']= "application/json"
 
         params = dict()
-        params['app_key'] = app_key
-        params['api_key'] = api_key
+        params['api_key'] = helper.get_global_setting("api_key")
 
-        r = helper.send_http_request(send_url, 'POST', parameters=params, payload=payload, headers=headers )
+        r = helper.send_http_request(send_url, 'POST', parameters=params, payload=payload, headers=headers , use_proxy=True )
     except Exception as err:
         helper.log_error("Handling run-time error: {}".format(err))
         helper.log_error("r: {}".format(r.text))
-        return 1
-    helper.log_info("result text: {}".format(r.text))
+        return False
+        
+    helper.log_debug("result.text='{}'".format(r.text))
 
+    if (helper.get_global_setting("log_datadog")) :
+        log_index = helper.get_global_setting("log_index")
+        helper.log_info('Logging response to index="{}"'.format(log_index))
+    
+        event='status="{}" id="{}" title="{}" text="{}" date_happened="{}" alert_type="{}" priority="{}" tags="{}" url="{}" owner="{}" app="{}" search_name="{}" results_link="{}"'.format(r.json()["status"], r.json()["event"]["id"], r.json()["event"]["title"], r.json()["event"]["text"], r.json()["event"]["date_happened"], helper.get_param('alert_type'), r.json()["event"]["priority"], r.json()["event"]["tags"], r.json()["event"]["url"], helper.settings.get("owner"), helper.settings.get("app"), helper.settings.get("search_name"), helper.settings.get("results_link") )
+        
+        helper.log_debug('event to sent to splunk {}'.format(event))
+
+        try:
+            helper.addevent(event, sourcetype="datadog:response")
+            helper.writeevents(index=log_index, host=helper.settings.get("server_host"), source="datadog_event")
+        except Exception as err:
+            helper.log_error("Handling run-time error: {}".format(err))
+            return False    
+
+    
     helper.log_info("Alert action datadog_event completed successfully.")
-    return 0
+    return True
+

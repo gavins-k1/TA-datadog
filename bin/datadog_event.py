@@ -16,28 +16,16 @@ class AlertActionWorkerdatadog_event(ModularAlertBase):
 
     def validate_params(self):
 
-        if not self.get_global_setting("dd_uri"):
-            self.log_error('dd_uri is a mandatory setup parameter, but its value is None.')
-            return False
-
         if not self.get_global_setting("api_key"):
             self.log_error('api_key is a mandatory setup parameter, but its value is None.')
-            return False
-
-        if not self.get_global_setting("app_key"):
-            self.log_error('app_key is a mandatory setup parameter, but its value is None.')
             return False
 
         if not self.get_param("title"):
             self.log_error('title is a mandatory parameter, but its value is None.')
             return False
 
-        if not self.get_param("alert_type"):
-            self.log_error('alert_type is a mandatory parameter, but its value is None.')
-            return False
-
-        if not self.get_param("priority"):
-            self.log_error('priority is a mandatory parameter, but its value is None.')
+        if not self.get_param("message"):
+            self.log_error('message is a mandatory parameter, but its value is None.')
             return False
         return True
 
@@ -48,12 +36,12 @@ class AlertActionWorkerdatadog_event(ModularAlertBase):
                 return 3
             status = modalert_datadog_event_helper.process_event(self, *args, **kwargs)
         except (AttributeError, TypeError) as ae:
-            self.log_error("Error: {}. Please double check spelling and also verify that a compatible version of Splunk_SA_CIM is installed.".format(ae.message))
+            self.log_error("Error: {}. Please double check spelling and also verify that a compatible version of Splunk_SA_CIM is installed.".format(str(ae)))
             return 4
         except Exception as e:
             msg = "Unexpected error: {}."
-            if e.message:
-                self.log_error(msg.format(e.message))
+            if e:
+                self.log_error(msg.format(str(e)))
             else:
                 import traceback
                 self.log_error(msg.format(traceback.format_exc()))

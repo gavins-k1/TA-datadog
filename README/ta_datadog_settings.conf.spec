@@ -11,6 +11,6 @@ proxy_rdns =
 loglevel = 
 
 [additional_parameters]
-dd_uri = 
 api_key = 
-app_key = 
+log_datadog = 
+log_index = 

@@ -1,21 +1,21 @@
 {
   "schemaVersion": "1.0.0",
   "info": {
-    "title": "Splunk Add-on for DataDog",
+    "title": "DataDog Event Custom Alert Action",
     "id": {
       "group": null,
       "name": "TA-datadog",
-      "version": "1.0.0"
+      "version": "2.0.0"
     },
     "author": [
       {
         "name": "Gavin Schneider @gavins_k1",
         "email": null,
-        "company": "Katana1"
+        "company": null
       }
     ],
     "releaseDate": null,
-    "description": "",
+    "description": "Addon for DataDog, alert action to send events to DataDog from Splunk",
     "classification": {
       "intendedAudience": null,
       "categories": [],

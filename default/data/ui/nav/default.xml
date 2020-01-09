@@ -1,3 +1,11 @@
 <nav search_view="search" color="#774aa4">
-<view name="configuration" default="true"/>
+  <view name="dd_info" />
+  <view name="configuration" default="true" />
+  <collection label="Search">
+  	<view name="search" />
+  	<view name="datasets" />
+  	<view name="reports" />
+  	<view name="alerts" />
+  	<view name="dashboards" />
+  </collection>
 </nav>

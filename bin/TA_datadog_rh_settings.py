@@ -93,16 +93,6 @@ model_logging = RestModel(fields_logging, name='logging')
 
 fields_additional_parameters = [
     field.RestField(
-        'dd_uri',
-        required=True,
-        encrypted=False,
-        default='https://app.datadoghq.com/api/v1',
-        validator=validator.String(
-            min_len=0, 
-            max_len=8192, 
-        )
-    ), 
-    field.RestField(
         'api_key',
         required=True,
         encrypted=True,
@@ -113,9 +103,16 @@ fields_additional_parameters = [
         )
     ), 
     field.RestField(
-        'app_key',
-        required=True,
-        encrypted=True,
+        'log_datadog',
+        required=False,
+        encrypted=False,
+        default=0,
+        validator=None
+    ), 
+    field.RestField(
+        'log_index',
+        required=False,
+        encrypted=False,
         default='',
         validator=validator.String(
             min_len=0, 
